@@ -10,7 +10,7 @@ public class EnemyController : MonoBehaviour
   private int moveRight = 1;
   private Vector2 velocity;
   private Vector2 originalPos;
-  private bool playingState = true;
+  private bool restartFlag = false;
   private Rigidbody2D enemyBody;
   void Start()
   {
@@ -30,7 +30,7 @@ public class EnemyController : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-      if (playingState){
+      if (!restartFlag){
         if (Mathf.Abs(enemyBody.position.x - originalX) < maxOffset)
         {
           // move gomba
@@ -46,10 +46,6 @@ public class EnemyController : MonoBehaviour
     }
   
   public void Stop(){
-    playingState = false;
-  }
-  public void Restart(){
-    enemyBody.position = originalPos;
-    playingState = true;
+    restartFlag = true;
   }
 }

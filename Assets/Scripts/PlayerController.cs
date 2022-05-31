@@ -16,7 +16,7 @@ public class PlayerController : MonoBehaviour
 	public Text scoreText;
 	private int score = 0;
 	private bool countScoreState = false;
-	private bool playingState = true;
+	public bool restartFlag = false;
 	public EnemyController enemyScript;
 	public MenuController menuScript;
     private Vector2 originalPos;
@@ -36,7 +36,7 @@ public class PlayerController : MonoBehaviour
 	// Update is called once per frame
 	void Update()
 	{
-        if (playingState){
+        if (!restartFlag){
 			if(Input.GetKeyDown("a") && faceRightState){
 					faceRightState = false;
 					marioSprite.flipX = true;
@@ -59,7 +59,7 @@ public class PlayerController : MonoBehaviour
 
 	void FixedUpdate()
 	{		
-		if (playingState) {
+		if (!restartFlag) {
 			float moveHorizontal = Input.GetAxis("Horizontal");
 			if (Mathf.Abs(moveHorizontal)> 0){
 				Vector2 movement = new Vector2(moveHorizontal, 0);
@@ -87,18 +87,11 @@ public class PlayerController : MonoBehaviour
 
 	void OnTriggerEnter2D(Collider2D other){
 			if(other.gameObject.CompareTag("Enemy")){
-				playingState = false;
+				restartFlag = true;
                 menuScript.Restart();
                 enemyScript.Stop();
 			}
 	}
-
-    public void Restart(){
-        marioBody.position = originalPos;
-        score = 0;
-        scoreText.text = "Score:0";
-        playingState = true;
-    }
 
 }
 
