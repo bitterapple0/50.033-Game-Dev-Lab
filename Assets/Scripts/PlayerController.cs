@@ -5,9 +5,9 @@ using UnityEngine.UI;
 public class PlayerController : MonoBehaviour
 {
 	private Rigidbody2D marioBody;
-	private float speed = 72;
-	private float maxSpeed = 10;
-	private float upSpeed = 23;
+	public float speed = 150;
+	public float maxSpeed = 5;
+	public float upSpeed = 25;
 	private SpriteRenderer marioSprite;
 	private bool faceRightState = true;
 	private bool onGroundState = true;
@@ -20,16 +20,20 @@ public class PlayerController : MonoBehaviour
 	public EnemyController enemyScript;
 	public MenuController menuScript;
     private Vector2 originalPos;
+	private AudioSource marioAudio;
+	private Animator marioAnimator;
 	// Start is called before the first frame update
 	void Start()
 	{
 		// Set to be 30 FPS
-		Application.targetFrameRate =  30;
+		Application.targetFrameRate =  60;
 		marioSprite = GetComponent<SpriteRenderer>();
 		marioBody = GetComponent<Rigidbody2D>();
         originalPos = marioBody.position;
 		enemyScript = FindObjectOfType<EnemyController>();
         menuScript = FindObjectOfType<MenuController>();
+		marioAnimator  =  GetComponent<Animator>();
+		marioAudio = GetComponent<AudioSource>();
 	}
 
 
@@ -40,10 +44,13 @@ public class PlayerController : MonoBehaviour
 			if(Input.GetKeyDown("a") && faceRightState){
 					faceRightState = false;
 					marioSprite.flipX = true;
+					if (Mathf.Abs(marioBody.velocity.x) >  1.0) marioAnimator.SetTrigger("onSkid");
+        	}
 			}
 			if(Input.GetKeyDown("d") && !faceRightState){
 					faceRightState = true;
 					marioSprite.flipX = false;
+					if (Mathf.Abs(marioBody.velocity.x) >  1.0) marioAnimator.SetTrigger("onSkid");
 			}
 
 			if (!onGroundState && countScoreState)
@@ -54,7 +61,9 @@ public class PlayerController : MonoBehaviour
 						score++;
 				}
 			}
-        }
+			
+			marioAnimator.SetFloat("xSpeed", Mathf.Abs(marioBody.velocity.x));
+			marioAnimator.SetBool("onGround", onGroundState);
 	}
 
 	void FixedUpdate()
@@ -67,31 +76,41 @@ public class PlayerController : MonoBehaviour
 			}
 			if((Input.GetKeyUp("a") || Input.GetKeyUp("b")) && !onGroundState){
 						marioBody.velocity = Vector2.zero;
-				}
-				if (Input.GetKeyDown("space") && onGroundState){
-					marioBody.AddForce(Vector2.up * upSpeed, ForceMode2D.Impulse);
-					onGroundState = false;
-					countScoreState = true;
-				}
+			}
+			if (Input.GetKeyDown("space") && onGroundState){
+				marioBody.AddForce(Vector2.up * upSpeed, ForceMode2D.Impulse);
+				onGroundState = false;
+				countScoreState = true;
+			}
         }
 	}
 	
+	void  PlayJumpSound(){	
+		marioAudio.PlayOneShot(marioAudio.clip);
+	}	
 	void OnCollisionEnter2D(Collision2D col)
 	{
 			if (col.gameObject.CompareTag("Ground")) {
 				onGroundState = true;
 				countScoreState = false;
-				scoreText.text = "Score:" + score.ToString();
+				// scoreText.text = "Score:" + score.ToString();
+				marioAnimator.SetBool("onGround", onGroundState);
+			}
+
+			if (col.gameObject.CompareTag("Obstacle") && Mathf.Abs(marioBody.velocity.y)<0.01f){
+				onGroundState = true;
+				marioAnimator.SetBool("onGround", onGroundState);
+
 			}
 	}
 
-	void OnTriggerEnter2D(Collider2D other){
-			if(other.gameObject.CompareTag("Enemy")){
-				restartFlag = true;
-                menuScript.Restart();
-                enemyScript.Stop();
-			}
-	}
+	// void OnTriggerEnter2D(Collider2D other){
+	// 		if(other.gameObject.CompareTag("Enemy")){
+	// 			restartFlag = true;
+    //             menuScript.Restart();
+    //             enemyScript.Stop();
+	// 		}
+	// }
 
 }
 

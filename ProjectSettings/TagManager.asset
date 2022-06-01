@@ -6,16 +6,19 @@ TagManager:
   tags:
   - Ground
   - Enemy
+  - Obstacle
+  - Background
+  - Spawn
   layers:
   - Default
   - TransparentFX
   - Ignore Raycast
-  - 
+  - Background
   - Water
   - UI
-  - 
-  - 
-  - 
+  - QuestionBox
+  - Obstacle
+  - Spawned
   - 
   - 
   - 
